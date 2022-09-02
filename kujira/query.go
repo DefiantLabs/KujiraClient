@@ -1,21 +1,39 @@
 package kujira
 
-type Book struct { //[]BookResponse
-}
+import (
+	"context"
+	"encoding/json"
+	"fmt"
 
-type BookResponse struct {
-	Base  []PoolResponse `json:"base"`
-	Quote []PoolResponse `json:"quote"`
-}
+	"github.com/CosmWasm/wasmd/x/wasm/types"
+)
 
-type PoolResponse struct {
-	QuotePrice       float64    `json:"quote_price,string"`
-	OfferDenom       OfferDenom `json:"offer_denom"`
-	TotalOfferAmount int64      `json:"total_offer_amount,string"`
-}
+func QueryOrders(contract string, options BookQueryOptions, client types.QueryClient) (orders BookResponse) {
+	query, e := json.Marshal(BookQuery{Book: options})
+	if e != nil {
+		fmt.Printf("Query options error %f\n", e)
+	}
+	// query := "{\"book\": {}}"
+	// if options.Limit != 0 {
+	// 	query = fmt.Sprintf("{\"book\": {\"limit\":%d}}", options.Limit)
+	// }
 
-//Note: Will always be one of 'NativeType' or 'CW20Type'
-type OfferDenom struct {
-	NativeType string `json:"native"`
-	CW20Type   string `json:"cw20"`
+	res, err := client.SmartContractState(
+		context.Background(),
+		&types.QuerySmartContractStateRequest{
+			Address:   contract,
+			QueryData: []byte(query),
+		},
+	)
+
+	if err != nil {
+		fmt.Printf("Error %f querying Kujira contract\n", err)
+	} else {
+		marshalErr := json.Unmarshal(res.Data, &orders)
+		if marshalErr != nil {
+			fmt.Printf("Unmarshal error %f \n", marshalErr)
+		}
+	}
+
+	return
 }
