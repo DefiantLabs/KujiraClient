@@ -27,3 +27,14 @@ type BookQueryOptions struct {
 	Limit  uint8 `json:"limit,omitempty"`
 	Offset uint8 `json:"offset,omitempty"`
 }
+
+// type CoinGeckoPairs struct {
+// 	Pairs []CoinGeckoPair `json:"pairs"`
+// }
+
+type CoinGeckoPair struct {
+	Base     string `json:"base"`
+	PoolID   string `json:"pool_id"`
+	Target   string `json:"target"`
+	TickerID string `json:"ticker_id"`
+}
